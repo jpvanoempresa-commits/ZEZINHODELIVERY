@@ -1,0 +1,43 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "server",
+    "db",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://35yMdVnGpRk3wfu.root:A8Gx349bYyigVmXt7L1C@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/LbstBpZ3WBrQMT9DTpteN2?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": [
+    "no_db_push"
+  ],
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663677167733/LbstBpZ3WBrQMT9DTpteN2",
+    "access_key_id": "ASIAZV3A2ECZN3NJHGCW",
+    "secret_access_key": "QbsGYv8XMZIYJUpZSGBP3L6HOpWLgTUbkLxhoqtm",
+    "session_token": "IQoJb3JpZ2luX2VjEBYaCXVzLWVhc3QtMSJIMEYCIQCo1OwnKlSSF16hD779gN8DPgI9tXLfUYCLCAPBFGCFiQIhAKopf2awG46TDbm3NZTzuYLipNM2bT8ESjHSKN4nuL4nKv0DCN///////////wEQBBoMNjY1Mzg2MDk4ODY2IgyWO/z5xOwmT8e0gWoq0QNiBXosfs/1t7NKPusZbVjvVUPZd7fdIWUWUf18LAR/X1OhSy1fzlwuilfqgAjSVwXxQ6VKp+ZUzvSBKwr1J/Lio99yXzvF8qtK8+0b1G3cgCMX7xAWdkW8PigrraD9p9Si5CbRTWbuP7GIQtN4hJPDE+3/ShiuaSo/Lm/ZV3usV5NDRVEhwuQX61opD7yqPew0CyoDLugxWgldfkMehQ3AHyX7H3zDHrWrlv1JPhUcbfnxPz6X2V5EHTnr0/9VsGbqbmxxZxvu9WsQlh0gS8+SdcZ1/h2qBhxHcGib0bWlIh7fXOmnXtonCjAoaducVVMLv5OaC4/T1+tKlTNemcsgjmsMt80mJSpG4jMElqMBuBovmtK2HtQIRtnKJ0sqoH8HHHXhMAIx5R1vfp1GsGcDjp/Mlmt4OoRohoewxGXaaorKls348kWTV4jAQeDLoTdl/S4xbufGM+Dz7GYhMsF0GHQTTD5rjprkfe6ktfXiA1AOqlMgUtA0ar6yZ+ZPaWboNfeO+RrQc6GCTNa3eH3Wit638Cy3eYeZ9cxUhceald1QmznUD53I5SF5hNCcnHOxlIFaRBpVRo/U36Gaoq66PfHx+NfsEkNfJvzXOpn+KGkwuaqz0AY6nAFMf33kxrZni9rcecrLLC60bI2ctWHkIOwvJuJC3H7Ey2Z2P3rlFFA98s7S+G07cmVreGmZUj6velfbgRWD+EJcSlT7yarjmdY2Ohy8y138lppdFF+MqiTR/gbZ+zYnn6/RKAq1/Sq3UxYR021MJ9sukn8M0ep/XYXFcF18uj+nJCQcn/z5G8zbmm17SiP+aehYCq6RRM9dgbmItlA=",
+    "expiration": "2026-05-20T09:25:13.000Z"
+  },
+  "name": "deliverygo",
+  "path": "/home/ubuntu/deliverygo",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "YukGWHaWHiZavqonEHmsEG",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "JWT_SECRET": "Zkp5M8F7TE5X6SfxZ8XZpC",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "João",
+    "OWNER_OPEN_ID": "guxDtuQsQZPFAGLyWUL9rJ",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "8656bffc-1035-4d66-bf3b-ea26deee411c",
+    "VITE_APP_ID": "LbstBpZ3WBrQMT9DTpteN2",
+    "VITE_APP_LOGO": "",
+    "VITE_APP_TITLE": "DeliveryGo",
+    "VITE_FRONTEND_FORGE_API_KEY": "njX6pK5ePqRzm9t3PKfrjc",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}
