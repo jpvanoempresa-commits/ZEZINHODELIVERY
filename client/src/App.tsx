@@ -8,6 +8,9 @@ import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Restaurant from "./pages/Restaurant";
 import Checkout from "./pages/Checkout";
+import RestaurantDashboard from "./pages/RestaurantDashboard";
+import DeliveryDashboard from "./pages/DeliveryDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -17,6 +20,9 @@ function Router() {
       <Route path={"/search"} component={Search} />
       <Route path={"/restaurant/:id"} component={Restaurant} />
       <Route path={"/checkout"} component={Checkout} />
+      <Route path={"/dashboard/restaurant"} component={RestaurantDashboard} />
+      <Route path={"/dashboard/delivery"} component={DeliveryDashboard} />
+      <Route path={"/dashboard/admin"} component={AdminDashboard} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

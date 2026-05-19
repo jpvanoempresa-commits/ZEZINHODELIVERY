@@ -292,6 +292,33 @@ export const appRouter = router({
       }),
   }),
 
+  // ============ DELIVERIES ============
+  deliveries: router({
+    getAvailable: publicProcedure.query(async () => db.getAvailableDeliveries()),
+    getActive: protectedProcedure.query(async ({ ctx }) => db.getActiveDeliveries(ctx.user.id)),
+    getCompleted: protectedProcedure.query(async ({ ctx }) => db.getCompletedDeliveries(ctx.user.id)),
+  }),
+
+  // ============ ADMIN ============
+  admin: router({
+    getAllOrders: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+      return db.getAllOrders();
+    }),
+    getAllCommissions: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+      return db.getAllCommissions();
+    }),
+    getAllUsers: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+      return db.getAllUsers();
+    }),
+    getAllRestaurants: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+      return db.getAllRestaurants();
+    }),
+  }),
+
   // ============ RATINGS ============
   ratings: router({
     create: protectedProcedure

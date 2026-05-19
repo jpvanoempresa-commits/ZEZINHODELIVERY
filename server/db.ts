@@ -470,3 +470,62 @@ export async function validateNBPayCredentials(): Promise<boolean> {
   console.log('[NBPay] Credentials validated successfully');
   return true;
 }
+
+// ============ DELIVERIES - HELPERS ============
+export async function getAvailableDeliveries() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select().from(deliveryAssignments)
+    .where(eq(deliveryAssignments.status, 'pending'))
+    .limit(20);
+}
+
+export async function getActiveDeliveries(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select().from(deliveryAssignments)
+    .where(eq(deliveryAssignments.status, 'active'))
+    .limit(10);
+}
+
+export async function getCompletedDeliveries(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select().from(deliveryAssignments)
+    .where(eq(deliveryAssignments.status, 'completed'))
+    .orderBy(desc(deliveryAssignments.updatedAt))
+    .limit(50);
+}
+
+// ============ ADMIN - HELPERS ============
+export async function getAllOrders() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select().from(orders)
+    .orderBy(desc(orders.createdAt))
+    .limit(100);
+}
+
+export async function getAllCommissions() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select().from(commissions)
+    .orderBy(desc(commissions.createdAt))
+    .limit(100);
+}
+
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select().from(users)
+    .orderBy(desc(users.createdAt))
+    .limit(100);
+}
+
+export async function getAllRestaurants() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.select().from(restaurants)
+    .orderBy(desc(restaurants.createdAt))
+    .limit(100);
+}
