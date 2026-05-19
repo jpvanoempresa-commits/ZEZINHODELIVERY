@@ -1,6 +1,10 @@
-import { eq } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { 
+  InsertUser, users, restaurants, products, orders, orderItems, 
+  payments, commissions, payouts, categories, restaurantCategories, 
+  coupons, ratings, deliveryAssignments 
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +93,355 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ============ RESTAURANTS ============
+export async function createRestaurant(data: {
+  userId: number;
+  name: string;
+  description?: string;
+  phone: string;
+  email: string;
+  address: string;
+  city: string;
+  zipCode?: string;
+  latitude?: string;
+  longitude?: string;
+  image?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(restaurants).values(data);
+  return result;
+}
+
+export async function getRestaurantsByCity(city: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(restaurants)
+    .where(and(eq(restaurants.city, city), eq(restaurants.status, 'active')));
+}
+
+export async function getRestaurantById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(restaurants)
+    .where(eq(restaurants.id, id));
+  return result[0];
+}
+
+export async function getRestaurantByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(restaurants)
+    .where(eq(restaurants.userId, userId));
+  return result[0];
+}
+
+// ============ PRODUCTS ============
+export async function createProduct(data: {
+  restaurantId: number;
+  name: string;
+  description?: string;
+  price: string;
+  image?: string;
+  category?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(products).values(data);
+}
+
+export async function getProductsByRestaurant(restaurantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(products)
+    .where(eq(products.restaurantId, restaurantId));
+}
+
+export async function getProductById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(products)
+    .where(eq(products.id, id));
+  return result[0];
+}
+
+// ============ ORDERS ============
+export async function createOrder(data: {
+  customerId: number;
+  restaurantId: number;
+  subtotal: string;
+  deliveryFee: string;
+  discount: string;
+  commission: string;
+  total: string;
+  restaurantReceives: string;
+  paymentMethod: 'pix' | 'credit_card' | 'debit_card';
+  deliveryAddress: string;
+  customerNotes?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(orders).values(data);
+}
+
+export async function getOrderById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(orders)
+    .where(eq(orders.id, id));
+  return result[0];
+}
+
+export async function getOrdersByCustomer(customerId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(orders)
+    .where(eq(orders.customerId, customerId))
+    .orderBy(desc(orders.createdAt));
+}
+
+export async function getOrdersByRestaurant(restaurantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(orders)
+    .where(eq(orders.restaurantId, restaurantId))
+    .orderBy(desc(orders.createdAt));
+}
+
+export async function updateOrderStatus(orderId: number, status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'on_delivery' | 'delivered' | 'cancelled') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.update(orders)
+    .set({ status })
+    .where(eq(orders.id, orderId));
+}
+
+export async function updateOrderPaymentStatus(orderId: number, paymentStatus: 'pending' | 'confirmed' | 'failed' | 'refunded') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.update(orders)
+    .set({ paymentStatus })
+    .where(eq(orders.id, orderId));
+}
+
+// ============ ORDER ITEMS ============
+export async function createOrderItem(data: {
+  orderId: number;
+  productId: number;
+  quantity: number;
+  price: string;
+  subtotal: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(orderItems).values(data);
+}
+
+export async function getOrderItems(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(orderItems)
+    .where(eq(orderItems.orderId, orderId));
+}
+
+// ============ PAYMENTS ============
+export async function createPayment(data: {
+  orderId: number;
+  amount: string;
+  method: 'pix' | 'credit_card' | 'debit_card';
+  pixKey?: string;
+  externalId?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(payments).values(data);
+}
+
+export async function getPaymentByOrderId(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(payments)
+    .where(eq(payments.orderId, orderId));
+  return result[0];
+}
+
+export async function updatePaymentStatus(paymentId: number, status: 'pending' | 'confirmed' | 'failed' | 'refunded', webhookData?: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const updateData: any = {
+    status,
+    confirmedAt: status === 'confirmed' ? new Date() : undefined,
+  };
+  
+  if (webhookData) {
+    updateData.webhookData = webhookData;
+  }
+  
+  return db.update(payments)
+    .set(updateData)
+    .where(eq(payments.id, paymentId));
+}
+
+// ============ COMMISSIONS ============
+export async function createCommission(data: {
+  orderId: number;
+  restaurantId: number;
+  amount: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(commissions).values(data);
+}
+
+export async function getCommissionsByRestaurant(restaurantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(commissions)
+    .where(eq(commissions.restaurantId, restaurantId))
+    .orderBy(desc(commissions.createdAt));
+}
+
+export async function getTotalCommissions() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select({
+    total: sql`SUM(amount)`,
+  }).from(commissions)
+    .where(eq(commissions.status, 'pending'));
+  
+  return result[0]?.total || 0;
+}
+
+// ============ PAYOUTS ============
+export async function createPayout(data: {
+  restaurantId: number;
+  amount: string;
+  pixKey: string;
+  externalId?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(payouts).values(data);
+}
+
+export async function getPayoutsByRestaurant(restaurantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(payouts)
+    .where(eq(payouts.restaurantId, restaurantId))
+    .orderBy(desc(payouts.createdAt));
+}
+
+export async function updatePayoutStatus(payoutId: number, status: 'pending' | 'processing' | 'completed' | 'failed') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const updateData: any = {
+    status,
+    completedAt: status === 'completed' ? new Date() : undefined,
+  };
+  
+  return db.update(payouts)
+    .set(updateData)
+    .where(eq(payouts.id, payoutId));
+}
+
+// ============ CATEGORIES ============
+export async function getAllCategories() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(categories);
+}
+
+// ============ COUPONS ============
+export async function getCouponByCode(code: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(coupons)
+    .where(eq(coupons.code, code));
+  return result[0];
+}
+
+// ============ RATINGS ============
+export async function createRating(data: {
+  orderId: number;
+  customerId: number;
+  restaurantId: number;
+  deliveryId?: number;
+  restaurantRating?: number;
+  deliveryRating?: number;
+  comment?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(ratings).values(data);
+}
+
+export async function getRatingsByRestaurant(restaurantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(ratings)
+    .where(eq(ratings.restaurantId, restaurantId))
+    .orderBy(desc(ratings.createdAt));
+}
+
+// ============ DELIVERY ASSIGNMENTS ============
+export async function createDeliveryAssignment(data: {
+  deliveryId: number;
+  orderId: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(deliveryAssignments).values(data);
+}
+
+export async function getDeliveryAssignmentsByDelivery(deliveryId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(deliveryAssignments)
+    .where(eq(deliveryAssignments.deliveryId, deliveryId))
+    .orderBy(desc(deliveryAssignments.createdAt));
+}
+
+export async function updateDeliveryAssignmentStatus(assignmentId: number, status: 'accepted' | 'in_transit' | 'delivered' | 'cancelled') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const updateData: any = {
+    status,
+    deliveryTime: status === 'delivered' ? new Date() : undefined,
+  };
+  
+  return db.update(deliveryAssignments)
+    .set(updateData)
+    .where(eq(deliveryAssignments.id, assignmentId));
+}
