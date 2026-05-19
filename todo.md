@@ -1,24 +1,24 @@
 # DeliveryGo - TODO
 
 ## Fase 1: Autenticação e Modelos Base
-- [ ] Sistema de autenticação (login/cadastro)
-- [ ] Modelos de dados: User, Restaurant, Delivery, Order, Product, Commission
-- [ ] Roles: customer, restaurant, delivery, admin
-- [ ] Estrutura de API base
+- [x] Sistema de autenticação (login/cadastro) - Manus OAuth
+- [x] Modelos de dados: User, Restaurant, Delivery, Order, Product, Commission - 13 tabelas criadas
+- [x] Roles: customer, restaurant, delivery, admin - Implementado em schema
+- [x] Estrutura de API base - tRPC com Express
 
 ## Fase 2: Frontend - Páginas Principais
-- [ ] Home page com busca e categorias
-- [ ] Página de restaurantes por categoria
-- [ ] Página de detalhes do restaurante e cardápio
-- [ ] Carrinho de compras
-- [ ] Checkout com cálculo de comissão
+- [x] Home page com busca e categorias - Implementada com design vermelho/branco
+- [x] Página de restaurantes por categoria - Search.tsx criada
+- [x] Página de detalhes do restaurante e cardápio - Restaurant.tsx com modal
+- [x] Carrinho de compras - Gerenciamento com useState
+- [x] Checkout com cálculo de comissão - Checkout.tsx com comissão R$10
 
 ## Fase 3: Sistema de Pagamento e Comissão
-- [ ] Integração NBPay com Pix
-- [ ] Cálculo automático de comissão (R$10 por pedido)
-- [ ] Exibição de comissão no checkout
-- [ ] Webhooks para confirmar pagamento Pix
-- [ ] Sistema de repasse automático ao restaurante
+- [x] Integração NBPay com Pix - Webhook endpoint criado
+- [x] Cálculo automático de comissão (R$10 por pedido) - Lógica implementada
+- [x] Exibição de comissão no checkout - Componente pronto
+- [x] Webhooks para confirmar pagamento Pix - /api/webhooks/nbpay
+- [x] Sistema de repasse automático ao restaurante - Procedure criada
 
 ## Fase 4: Painel do Restaurante
 - [ ] Dashboard com estatísticas

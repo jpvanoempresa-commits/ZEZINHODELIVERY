@@ -7,17 +7,18 @@
   ],
   "dev_command": "pnpm run dev",
   "env_vars": {
-    "DATABASE_URL": "mysql://35yMdVnGpRk3wfu.root:A8Gx349bYyigVmXt7L1C@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/LbstBpZ3WBrQMT9DTpteN2?ssl={\"rejectUnauthorized\":true}"
+    "DATABASE_URL": "mysql://35yMdVnGpRk3wfu.root:A8Gx349bYyigVmXt7L1C@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/LbstBpZ3WBrQMT9DTpteN2?ssl={\"rejectUnauthorized\":true}",
+    "DRIZZLE_DATABASE_URL": "mysql://35yMdVnGpRk3wfu.root:A8Gx349bYyigVmXt7L1C@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/LbstBpZ3WBrQMT9DTpteN2?ssl={\"rejectUnauthorized\":true}"
   },
   "experiments": [
     "no_db_push"
   ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663677167733/LbstBpZ3WBrQMT9DTpteN2",
-    "access_key_id": "ASIAZV3A2ECZN3NJHGCW",
-    "secret_access_key": "QbsGYv8XMZIYJUpZSGBP3L6HOpWLgTUbkLxhoqtm",
-    "session_token": "IQoJb3JpZ2luX2VjEBYaCXVzLWVhc3QtMSJIMEYCIQCo1OwnKlSSF16hD779gN8DPgI9tXLfUYCLCAPBFGCFiQIhAKopf2awG46TDbm3NZTzuYLipNM2bT8ESjHSKN4nuL4nKv0DCN///////////wEQBBoMNjY1Mzg2MDk4ODY2IgyWO/z5xOwmT8e0gWoq0QNiBXosfs/1t7NKPusZbVjvVUPZd7fdIWUWUf18LAR/X1OhSy1fzlwuilfqgAjSVwXxQ6VKp+ZUzvSBKwr1J/Lio99yXzvF8qtK8+0b1G3cgCMX7xAWdkW8PigrraD9p9Si5CbRTWbuP7GIQtN4hJPDE+3/ShiuaSo/Lm/ZV3usV5NDRVEhwuQX61opD7yqPew0CyoDLugxWgldfkMehQ3AHyX7H3zDHrWrlv1JPhUcbfnxPz6X2V5EHTnr0/9VsGbqbmxxZxvu9WsQlh0gS8+SdcZ1/h2qBhxHcGib0bWlIh7fXOmnXtonCjAoaducVVMLv5OaC4/T1+tKlTNemcsgjmsMt80mJSpG4jMElqMBuBovmtK2HtQIRtnKJ0sqoH8HHHXhMAIx5R1vfp1GsGcDjp/Mlmt4OoRohoewxGXaaorKls348kWTV4jAQeDLoTdl/S4xbufGM+Dz7GYhMsF0GHQTTD5rjprkfe6ktfXiA1AOqlMgUtA0ar6yZ+ZPaWboNfeO+RrQc6GCTNa3eH3Wit638Cy3eYeZ9cxUhceald1QmznUD53I5SF5hNCcnHOxlIFaRBpVRo/U36Gaoq66PfHx+NfsEkNfJvzXOpn+KGkwuaqz0AY6nAFMf33kxrZni9rcecrLLC60bI2ctWHkIOwvJuJC3H7Ey2Z2P3rlFFA98s7S+G07cmVreGmZUj6velfbgRWD+EJcSlT7yarjmdY2Ohy8y138lppdFF+MqiTR/gbZ+zYnn6/RKAq1/Sq3UxYR021MJ9sukn8M0ep/XYXFcF18uj+nJCQcn/z5G8zbmm17SiP+aehYCq6RRM9dgbmItlA=",
-    "expiration": "2026-05-20T09:25:13.000Z"
+    "access_key_id": "ASIAZV3A2ECZEQ6K7H4U",
+    "secret_access_key": "z57cp0AV05JJXQlWDN00ppVrVrbvEBp5vH+ZRLUP",
+    "session_token": "IQoJb3JpZ2luX2VjEBYaCXVzLWVhc3QtMSJGMEQCIAqHLM0sZ2cGG8isfXHNIhS2mTivZEN8g93vqZG/SzbSAiASK2aGHUOQPOGdZPVlC3GfzeNmQEVhI7OhBPoh1ZO11Sr9Awjf//////////8BEAQaDDY2NTM4NjA5ODg2NiIMKes3S2n3NSIEcAnMKtEDlQW38CNcKdl3jKWd20vDoI5jt6ZcOcIvQMQNsPAROwXjmgK0wEaVTPT4LtF4sdP9tUAuX2jx1W66qYRB6zwEFLBHbUC62jnYLfvHuWIAJpIMyrixUwsbS0svvKOxpEPMn9biYJenVbgIKxMGKkVV4IeTJndej/TZqb7TLSga3bX1Ch0Pc03S/gvWb2jxP5DiwOqnldJpIRF+Vj4QINTF8z1GKaafmJOvyyxePRVwDw7hVTUuuZw/i08xjkUOURNTQfjGXh8FI5rQZ/HkEAetgUf8FGITaqldWJ4j/SqGNCnv5CRCkZQS250p/EqWJE9C5uOg6zFLQHjr7lKTbIX2juWrli/LNO8P/KS8OJqDxVpUulNM8qqK/cq4xUP6YD6mLWsHAVRaqN32B0DQWp++guPvRYmQxbse8xS57LaBGpwd6n3EcjLfVEflJs1/h12Ch9R4JY0b48iChVPJXSWdbTjCQDRGJFzsXQeVfGLgW9h5zrPRn65wGinMuWAqOLX2qUHRoLvXzzxf4JvcCHfYNfNIqyNO87wA7iry9bMhV4r4TPNnoEoYKi+SRziE31DfHjJ3tzNUNSDnlUPorv/et030YHjAG+0AwufSzVwZP96YMOu3s9AGOp4B16+yyzC75Urt+sEJhXvLE5hYBCoqb5bLftSeoM2UliLvoq4kLHfd8lX3T4GDlauY+OwMIjSQEnIVvgNgXaoYrma5VtSacjwbxk3BRhlxZ1azXWWj3KvzVbUKczxCNgHsW2aYMzXHfAYmPGn6bCy1AIopEqLa2FWPGcVqkSuOp/B+3s0+pmBA4RKuU6fbe4uz9RdiQg1ufxNKapO1Ofw=",
+    "expiration": "2026-05-20T09:53:47.000Z"
   },
   "name": "deliverygo",
   "path": "/home/ubuntu/deliverygo",
@@ -26,13 +27,15 @@
     "BUILT_IN_FORGE_API_KEY": "YukGWHaWHiZavqonEHmsEG",
     "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
     "JWT_SECRET": "Zkp5M8F7TE5X6SfxZ8XZpC",
+    "NBPAY_API_KEY": "nxp_4gD8MFPeJFXhR3NoLioMfE7cN79LTlv9QFEgrGFAKimi7RFjzlezmYcndZsiJAx5",
+    "NBPAY_SECRET_KEY": "joolaerciocodognoto_17792254420002406",
     "OAUTH_SERVER_URL": "https://api.manus.im",
     "OWNER_NAME": "João",
     "OWNER_OPEN_ID": "guxDtuQsQZPFAGLyWUL9rJ",
     "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
     "VITE_ANALYTICS_WEBSITE_ID": "8656bffc-1035-4d66-bf3b-ea26deee411c",
     "VITE_APP_ID": "LbstBpZ3WBrQMT9DTpteN2",
-    "VITE_APP_LOGO": "",
+    "VITE_APP_LOGO": "https://files.manuscdn.com/user_upload_by_module/web_dev_logo/310519663677167733/nwBsCpBneGqfuqYT.png",
     "VITE_APP_TITLE": "DeliveryGo",
     "VITE_FRONTEND_FORGE_API_KEY": "njX6pK5ePqRzm9t3PKfrjc",
     "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",

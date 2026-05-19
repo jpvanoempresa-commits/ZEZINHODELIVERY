@@ -445,3 +445,28 @@ export async function updateDeliveryAssignmentStatus(assignmentId: number, statu
     .set(updateData)
     .where(eq(deliveryAssignments.id, assignmentId));
 }
+
+// ============ NBPAY VALIDATION ============
+export async function validateNBPayCredentials(): Promise<boolean> {
+  const apiKey = process.env.NBPAY_API_KEY;
+  const secretKey = process.env.NBPAY_SECRET_KEY;
+  
+  if (!apiKey || !secretKey) {
+    console.error('[NBPay] Missing API credentials');
+    return false;
+  }
+  
+  // Validate format
+  if (!apiKey.startsWith('nxp_')) {
+    console.error('[NBPay] Invalid API key format');
+    return false;
+  }
+  
+  if (secretKey.length < 10) {
+    console.error('[NBPay] Invalid secret key format');
+    return false;
+  }
+  
+  console.log('[NBPay] Credentials validated successfully');
+  return true;
+}
