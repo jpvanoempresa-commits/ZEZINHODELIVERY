@@ -24,10 +24,8 @@ export default function Home() {
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-red-600">DeliveryGo</h1>
+            <img src="/manus-storage/WhatsAppImage2026-05-20at18.45.46_e16157f8.jpeg" alt="Zezinho Delivery" className="w-10 h-10" />
+            <h1 className="text-2xl font-bold text-amber-500">Zezinho Delivery</h1>
           </div>
           <nav className="flex items-center gap-4">
             {isAuthenticated ? (
@@ -38,7 +36,7 @@ export default function Home() {
                 </Button>
               </>
             ) : (
-              <Button className="bg-red-600 hover:bg-red-700" size="sm">
+              <Button className="bg-red-600 hover:bg-red-700" size="sm" onClick={() => setLocation("/login")}>
                 Entrar
               </Button>
             )}

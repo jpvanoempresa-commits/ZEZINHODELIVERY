@@ -15,6 +15,13 @@
       "when": 1779226063522,
       "tag": "0001_dashing_invaders",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1779315752099,
+      "tag": "0002_white_vindicator",
+      "breakpoints": true
     }
   ]
 }
