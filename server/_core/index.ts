@@ -7,6 +7,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { handleNBPayWebhook } from "../webhook-handler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -49,15 +50,10 @@ async function startServer() {
         return res.status(401).json({ error: 'Invalid signature' });
       }
       
-      // Processar webhook
-      const { transactionId, status, amount } = req.body;
-      console.log(`[NBPay Webhook] Pagamento ${transactionId}: ${status}`);
+      // Processar webhook - somar saldo automaticamente
+      const success = await handleNBPayWebhook(req.body);
       
-      // TODO: Atualizar status do pagamento no banco de dados
-      // TODO: Se confirmado, criar payout para o restaurante
-      // TODO: Enviar notificação para cliente e restaurante
-      
-      res.json({ success: true });
+      res.json({ success });
     } catch (error) {
       console.error('[NBPay Webhook] Erro:', error);
       res.status(500).json({ error: 'Internal server error' });

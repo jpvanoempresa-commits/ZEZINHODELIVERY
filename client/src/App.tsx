@@ -8,9 +8,9 @@ import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Restaurant from "./pages/Restaurant";
 import Checkout from "./pages/Checkout";
-import RestaurantDashboard from "./pages/RestaurantDashboard";
-import DeliveryDashboard from "./pages/DeliveryDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+import RestaurantPanel from "./pages/RestaurantPanel";
+import DeliveryPanel from "./pages/DeliveryPanel";
+import AdminPanel from "./pages/AdminPanel";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -24,9 +24,9 @@ function Router() {
       <Route path={"/search"} component={Search} />
       <Route path={"/restaurant/:id"} component={Restaurant} />
       <Route path={"/checkout"} component={Checkout} />
-      <Route path={"/dashboard/restaurant"} component={RestaurantDashboard} />
-      <Route path={"/dashboard/delivery"} component={DeliveryDashboard} />
-      <Route path={"/dashboard/admin"} component={AdminDashboard} />
+      <Route path={"/dashboard/restaurant"} component={RestaurantPanel} />
+      <Route path={"/dashboard/delivery"} component={DeliveryPanel} />
+      <Route path={"/dashboard/admin"} component={AdminPanel} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

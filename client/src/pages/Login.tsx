@@ -1,191 +1,94 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Mail, Phone, Chrome } from "lucide-react";
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import { Mail, Lock, Phone } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const [loginMethod, setLoginMethod] = useState<"email" | "phone" | "google">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      toast.error("Preencha email e senha");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // TODO: Implementar login com email/senha via tRPC
-      toast.success("Login realizado com sucesso!");
-      setLocation("/");
-    } catch (error) {
-      toast.error("Erro ao fazer login");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePhoneLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phone) {
-      toast.error("Digite seu telefone");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // TODO: Implementar login com telefone via tRPC
-      toast.success("Código enviado para seu telefone!");
-    } catch (error) {
-      toast.error("Erro ao enviar código");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    // TODO: Implementar login com Google OAuth
-    window.location.href = "/api/oauth/google";
-  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 shadow-lg">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <img src="/manus-storage/WhatsAppImage2026-05-20at18.45.46_e16157f8.jpeg" alt="Zezinho" className="w-16 h-16 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-amber-600">Zezinho Delivery</h1>
-          <p className="text-gray-600 mt-2">Entrar na sua conta</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <div className="p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-red-600">Zezinho Delivery</h1>
+            <p className="text-gray-600 mt-2">Entre na sua conta</p>
+          </div>
 
-        {/* Login Method Tabs */}
-        <div className="flex gap-2 mb-6 border-b">
-          <button
-            onClick={() => setLoginMethod("email")}
-            className={`flex-1 py-2 px-4 text-sm font-medium transition-colors ${
-              loginMethod === "email"
-                ? "text-amber-600 border-b-2 border-amber-600"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <Mail className="w-4 h-4 inline mr-2" />
-            Email
-          </button>
-          <button
-            onClick={() => setLoginMethod("phone")}
-            className={`flex-1 py-2 px-4 text-sm font-medium transition-colors ${
-              loginMethod === "phone"
-                ? "text-amber-600 border-b-2 border-amber-600"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <Phone className="w-4 h-4 inline mr-2" />
-            Telefone
-          </button>
-        </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Input
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
-        {/* Email Login Form */}
-        {loginMethod === "email" && (
-          <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <Input
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-              />
+              <label className="block text-sm font-medium mb-2">Senha</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Senha</label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-amber-600 hover:bg-amber-700"
-              disabled={isLoading}
-            >
-              {isLoading ? "Entrando..." : "Entrar"}
+
+            <Button className="w-full bg-red-600 hover:bg-red-700">
+              Entrar
             </Button>
-          </form>
-        )}
 
-        {/* Phone Login Form */}
-        {loginMethod === "phone" && (
-          <form onSubmit={handlePhoneLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
-              <Input
-                type="tel"
-                placeholder="(11) 99999-9999"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                disabled={isLoading}
-              />
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">ou</span>
+              </div>
             </div>
-            <Button
-              type="submit"
-              className="w-full bg-amber-600 hover:bg-amber-700"
-              disabled={isLoading}
-            >
-              {isLoading ? "Enviando..." : "Enviar Código"}
+
+            <Button variant="outline" className="w-full">
+              Entrar com Google
             </Button>
-          </form>
-        )}
 
-        {/* Divider */}
-        <div className="my-6 flex items-center gap-4">
-          <div className="flex-1 h-px bg-gray-300"></div>
-          <span className="text-sm text-gray-500">ou</span>
-          <div className="flex-1 h-px bg-gray-300"></div>
+            <Button variant="outline" className="w-full">
+              <Phone className="w-4 h-4 mr-2" />
+              Entrar com Telefone
+            </Button>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Não tem conta?{" "}
+              <button
+                onClick={() => setLocation("/register")}
+                className="text-red-600 font-semibold hover:underline"
+              >
+                Cadastre-se
+              </button>
+            </p>
+          </div>
+
+          <div className="mt-4 text-center">
+            <button className="text-sm text-red-600 hover:underline">
+              Esqueceu a senha?
+            </button>
+          </div>
         </div>
-
-        {/* Google Login Button */}
-        <Button
-          onClick={handleGoogleLogin}
-          variant="outline"
-          className="w-full"
-        >
-          <Chrome className="w-4 h-4 mr-2" />
-          Entrar com Google
-        </Button>
-
-        {/* Sign Up Link */}
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Não tem conta?{" "}
-          <button
-            onClick={() => setLocation("/register")}
-            className="text-amber-600 font-medium hover:underline"
-          >
-            Criar conta
-          </button>
-        </p>
-
-        {/* Forgot Password Link */}
-        <p className="text-center text-sm text-gray-600 mt-2">
-          <button
-            onClick={() => setLocation("/forgot-password")}
-            className="text-amber-600 font-medium hover:underline"
-          >
-            Esqueceu a senha?
-          </button>
-        </p>
       </Card>
     </div>
   );

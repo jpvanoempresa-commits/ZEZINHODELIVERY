@@ -6,6 +6,7 @@ import { z } from "zod";
 import * as db from "./db";
 import { TRPCError } from "@trpc/server";
 import { generatePixQRCode, checkPixPaymentStatus } from "./nbpay";
+import { transferPixNexano, validatePixKey } from "./nexano";
 
 export const appRouter = router({
   system: systemRouter,
@@ -398,8 +399,7 @@ export const appRouter = router({
     requestWithdrawal: protectedProcedure
       .input(z.object({
         amount: z.number().positive(),
-        bankAccount: z.string().min(1),
-        bankCode: z.string().min(1),
+        pixKey: z.string().min(1),
       }))
       .mutation(async ({ ctx, input }) => {
         if (ctx.user.role !== 'restaurant') {
@@ -411,13 +411,40 @@ export const appRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Restaurant not found' });
         }
         
-        return db.createPayout({
+        if ((restaurant.balance || 0) < input.amount) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Insufficient balance' });
+        }
+        
+        const isValidPixKey = await validatePixKey(input.pixKey);
+        if (!isValidPixKey) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid Pix key' });
+        }
+        
+        const payout = await db.createPayout({
           restaurantId: restaurant.id,
           amount: input.amount.toString(),
           status: 'pending',
-          bankAccount: input.bankAccount,
-          bankCode: input.bankCode,
+          bankAccount: input.pixKey,
+          bankCode: 'PIX',
         });
+        
+        const result = await transferPixNexano(
+          input.amount,
+          input.pixKey,
+          `Saque Zezinho Delivery - ${restaurant.name}`
+        );
+        
+        if (result.success && result.transactionId) {
+          await db.updatePayout(payout.id, {
+            status: 'completed',
+            transactionId: result.transactionId,
+          });
+          await db.updateRestaurantBalance(restaurant.id, -input.amount);
+          return { success: true, transactionId: result.transactionId };
+        } else {
+          await db.updatePayout(payout.id, { status: 'failed' });
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: result.error || 'Transfer failed' });
+        }
       }),
 
     getMyPayouts: protectedProcedure
@@ -449,7 +476,7 @@ export const appRouter = router({
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Only admins can approve payouts' });
         }
         
-        return db.updatePayoutStatus(input.payoutId, 'approved');
+        return db.updatePayoutStatus(input.payoutId, 'processing');
       }),
 
     completePayout: protectedProcedure

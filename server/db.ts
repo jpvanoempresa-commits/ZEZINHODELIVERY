@@ -540,3 +540,24 @@ export async function getAllRestaurants() {
     .orderBy(desc(restaurants.createdAt))
     .limit(100);
 }
+
+export async function updatePayout(payoutId: number, data: { status?: string; transactionId?: string }) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const updates: any = {};
+  if (data.status) updates.status = data.status;
+  if (data.transactionId) updates.transactionId = data.transactionId;
+  updates.updatedAt = new Date();
+  
+  return db.update(payouts).set(updates).where(eq(payouts.id, payoutId));
+}
+
+export async function updateRestaurantBalance(restaurantId: number, amount: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  return db.update(restaurants)
+    .set({ balance: (restaurants.balance as any).add(amount) })
+    .where(eq(restaurants.id, restaurantId));
+}
