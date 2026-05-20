@@ -254,6 +254,46 @@ export const appRouter = router({
         return db.getPaymentByOrderId(input.orderId);
       }),
 
+    generatePixQRCode: protectedProcedure
+      .input(z.object({
+        orderId: z.number(),
+        amount: z.number().positive(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const { generatePixQRCode } = await import('../nbpay');
+          const qrCodeData = await generatePixQRCode(
+            input.amount,
+            input.orderId,
+            input.description || `Pedido #${input.orderId}`
+          );
+          
+          await db.createPayment({
+            orderId: input.orderId,
+            amount: input.amount.toString(),
+            method: 'pix',
+            externalId: qrCodeData.transactionId,
+            pixKey: qrCodeData.qrCode,
+          });
+          
+          return qrCodeData;
+        } catch (error: any) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
+        }
+      }),
+
+    checkPixStatus: protectedProcedure
+      .input(z.object({ transactionId: z.string() }))
+      .query(async ({ input }) => {
+        try {
+          const { checkPixPaymentStatus } = await import('../nbpay');
+          return await checkPixPaymentStatus(input.transactionId);
+        } catch (error: any) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
+        }
+      }),
+
     confirmPayment: protectedProcedure
       .input(z.object({
         paymentId: z.number(),
@@ -351,6 +391,76 @@ export const appRouter = router({
       .input(z.object({ restaurantId: z.number() }))
       .query(async ({ input }) => {
         return db.getRatingsByRestaurant(input.restaurantId);
+      }),
+  }),
+
+  // ============ PAYOUTS (SAQUES) ============
+  payouts: router({
+    requestWithdrawal: protectedProcedure
+      .input(z.object({
+        amount: z.number().positive(),
+        bankAccount: z.string().min(1),
+        bankCode: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'restaurant') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only restaurants can request withdrawals' });
+        }
+        
+        const restaurant = await db.getRestaurantByUserId(ctx.user.id);
+        if (!restaurant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Restaurant not found' });
+        }
+        
+        return db.createPayout({
+          restaurantId: restaurant.id,
+          amount: input.amount.toString(),
+          status: 'pending',
+          bankAccount: input.bankAccount,
+          bankCode: input.bankCode,
+        });
+      }),
+
+    getMyPayouts: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'restaurant') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only restaurants can view payouts' });
+        }
+        
+        const restaurant = await db.getRestaurantByUserId(ctx.user.id);
+        if (!restaurant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Restaurant not found' });
+        }
+        
+        return db.getPayoutsByRestaurant(restaurant.id);
+      }),
+
+    getAllPayouts: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only admins can view all payouts' });
+        }
+        return db.getAllPayouts();
+      }),
+
+    approvePayout: protectedProcedure
+      .input(z.object({ payoutId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only admins can approve payouts' });
+        }
+        
+        return db.updatePayoutStatus(input.payoutId, 'approved');
+      }),
+
+    completePayout: protectedProcedure
+      .input(z.object({ payoutId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only admins can complete payouts' });
+        }
+        
+        return db.updatePayoutStatus(input.payoutId, 'completed');
       }),
   }),
 });

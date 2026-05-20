@@ -337,13 +337,24 @@ export async function getTotalCommissions() {
 export async function createPayout(data: {
   restaurantId: number;
   amount: string;
-  pixKey: string;
+  status: string;
+  bankAccount: string;
+  bankCode: string;
+  pixKey?: string;
   externalId?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
   return db.insert(payouts).values(data);
+}
+
+export async function getAllPayouts() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.select().from(payouts)
+    .orderBy(desc(payouts.createdAt));
 }
 
 export async function getPayoutsByRestaurant(restaurantId: number) {

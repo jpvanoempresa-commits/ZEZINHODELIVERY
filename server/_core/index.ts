@@ -35,6 +35,35 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  
+  // ============ WEBHOOK NBPAY ============
+  app.post('/api/webhooks/nbpay', async (req, res) => {
+    try {
+      const signature = req.headers['x-nbpay-signature'] as string;
+      const payload = JSON.stringify(req.body);
+      
+      // Validar assinatura
+      const { validateWebhookSignature } = await import('../nbpay');
+      if (!validateWebhookSignature(payload, signature)) {
+        console.warn('[NBPay Webhook] Assinatura inválida');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      // Processar webhook
+      const { transactionId, status, amount } = req.body;
+      console.log(`[NBPay Webhook] Pagamento ${transactionId}: ${status}`);
+      
+      // TODO: Atualizar status do pagamento no banco de dados
+      // TODO: Se confirmado, criar payout para o restaurante
+      // TODO: Enviar notificação para cliente e restaurante
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('[NBPay Webhook] Erro:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
   // tRPC API
   app.use(
     "/api/trpc",
