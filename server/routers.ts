@@ -5,6 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
 import { TRPCError } from "@trpc/server";
+import { generatePixQRCode, checkPixPaymentStatus } from "./nbpay";
 
 export const appRouter = router({
   system: systemRouter,
@@ -262,7 +263,6 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         try {
-          const { generatePixQRCode } = await import('../nbpay');
           const qrCodeData = await generatePixQRCode(
             input.amount,
             input.orderId,
@@ -287,7 +287,6 @@ export const appRouter = router({
       .input(z.object({ transactionId: z.string() }))
       .query(async ({ input }) => {
         try {
-          const { checkPixPaymentStatus } = await import('../nbpay');
           return await checkPixPaymentStatus(input.transactionId);
         } catch (error: any) {
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
