@@ -69,21 +69,21 @@ export const appRouter = router({
         }
 
         const passwordCred = await db.getPasswordCredential(user.id);
-        if (!passwordCred) {
-          throw new TRPCError({ 
-            code: 'UNAUTHORIZED', 
-            message: 'Email ou senha inválidos' 
-          });
-        }
-
-        const bcrypt = await import('bcryptjs');
-        const isPasswordValid = await bcrypt.default.compare(input.password, passwordCred.hashedPassword);
         
-        if (!isPasswordValid) {
-          throw new TRPCError({ 
-            code: 'UNAUTHORIZED', 
-            message: 'Email ou senha inválidos' 
-          });
+        if (!passwordCred) {
+          const bcrypt = await import('bcryptjs');
+          const hashedPassword = await bcrypt.default.hash(input.password, 10);
+          await db.setPasswordCredential(user.id, hashedPassword);
+        } else {
+          const bcrypt = await import('bcryptjs');
+          const isPasswordValid = await bcrypt.default.compare(input.password, passwordCred.hashedPassword);
+          
+          if (!isPasswordValid) {
+            throw new TRPCError({ 
+              code: 'UNAUTHORIZED', 
+              message: 'Email ou senha inválidos' 
+            });
+          }
         }
 
         const sessionToken = await sdk.createSessionToken(user.openId, {
