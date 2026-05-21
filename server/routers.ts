@@ -140,11 +140,13 @@ export const appRouter = router({
       }))
       .mutation(async ({ ctx, input }) => {
         return db.createOrder({
+        userId: ctx.user.id,
           
           restaurantId: input.restaurantId,
           items: input.items,
           total: input.total,
           deliveryAddress: input.deliveryAddress,
+        status: 'pending',
           
         });
       }),
@@ -169,7 +171,7 @@ export const appRouter = router({
         amount: z.string(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const qrCode = 'test-qr-code';
+        const qrCode = 'test-qr-code'; // TODO: Implement real QR code generation
         
         await db.createPayment({
           orderId: input.orderId,
@@ -189,7 +191,7 @@ export const appRouter = router({
         const payment = await db.getPaymentById(input.paymentId);
         if (!payment) throw new TRPCError({ code: 'NOT_FOUND' });
         
-        const status = await checkPixPaymentStatus(qrCode, 'test', 'test');
+        const status = await checkPixPaymentStatus(qrCode);
         return { status };
       }),
   }),
