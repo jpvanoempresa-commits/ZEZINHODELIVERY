@@ -28,12 +28,15 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
+      const isAdminEmail = userInfo.email === 'zezinhodeliverybr@gmail.com';
+      
       await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
+        role: isAdminEmail ? 'admin' : 'customer',
       });
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
