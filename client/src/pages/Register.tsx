@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 export default function Register() {
   const [, setLocation] = useLocation();
@@ -22,6 +23,8 @@ export default function Register() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const registerMutation = trpc.auth.register.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,11 +53,17 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      // TODO: Implementar registro via tRPC
+      await registerMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        role: formData.role,
+      });
       toast.success("Conta criada com sucesso! Faça login para continuar.");
       setLocation("/login");
-    } catch (error) {
-      toast.error("Erro ao criar conta");
+    } catch (error: any) {
+      toast.error(error?.message || "Erro ao criar conta");
     } finally {
       setIsLoading(false);
     }

@@ -387,3 +387,38 @@ export async function getRestaurantBalance(restaurantId: number) {
   if (!restaurant) return 0;
   return getBalance(restaurant.userId);
 }
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createUserWithPassword(data: {
+  name: string;
+  email: string;
+  phone: string | null;
+  password: string;
+  role: 'customer' | 'restaurant' | 'delivery';
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(users).values({
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    role: data.role,
+    openId: `email_${data.email}_${Date.now()}`,
+    loginMethod: 'email',
+    lastSignedIn: new Date(),
+  });
+
+  return result;
+}

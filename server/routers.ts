@@ -19,6 +19,38 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    register: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        phone: z.string().optional(),
+        password: z.string().min(6),
+        role: z.enum(['customer', 'restaurant', 'delivery']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const existingUser = await db.getUserByEmail(input.email);
+        if (existingUser) {
+          throw new TRPCError({ 
+            code: 'CONFLICT', 
+            message: 'Email já cadastrado' 
+          });
+        }
+
+        const user = await db.createUserWithPassword({
+          name: input.name,
+          email: input.email,
+          phone: input.phone || null,
+          password: input.password,
+          role: input.role || 'customer',
+        });
+
+        return {
+          success: true,
+          message: 'Usuário cadastrado com sucesso',
+          user,
+        };
+      }),
+
     login: publicProcedure
       .input(z.object({
         email: z.string().email(),
