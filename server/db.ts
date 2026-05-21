@@ -561,3 +561,30 @@ export async function updateRestaurantBalance(restaurantId: number, amount: numb
     .set({ balance: (restaurants.balance as any).add(amount) })
     .where(eq(restaurants.id, restaurantId));
 }
+
+export async function getRestaurantBalance(restaurantId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ balance: restaurants.balance }).from(restaurants).where(eq(restaurants.id, restaurantId)).limit(1);
+  return result[0]?.balance || 0;
+}
+
+export async function getOrdersByRestaurant(restaurantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(orders).where(eq(orders.restaurantId, restaurantId)).orderBy(desc(orders.createdAt)).limit(50);
+}
+
+export async function getRestaurantByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(restaurants).where(eq(restaurants.userId, userId)).limit(1);
+  return result[0] || null;
+}
+
+export async function getPaymentById(paymentId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(payments).where(eq(payments.id, paymentId)).limit(1);
+  return result[0] || null;
+}
