@@ -21,6 +21,11 @@ import Support from "./pages/Support";
 import OrderHistory from "./pages/OrderHistory";
 import OrderTracking from "./pages/OrderTracking";
 import Ratings from "./pages/Ratings";
+import Promotions from "./pages/Promotions";
+import Restaurants from "./pages/Restaurants";
+import Menu from "./pages/Menu";
+import Cart from "./pages/Cart";
+import CheckoutPage from "./pages/CheckoutPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -43,6 +48,11 @@ function Router() {
       <Route path={"/order-history"} component={OrderHistory} />
       <Route path={"/order-tracking"} component={OrderTracking} />
       <Route path={"/ratings"} component={Ratings} />
+      <Route path={"/promotions"} component={Promotions} />
+      <Route path={"/restaurants"} component={Restaurants} />
+      <Route path={"/menu/:id"} component={Menu} />
+      <Route path={"/cart"} component={Cart} />
+      <Route path={"/checkout"} component={CheckoutPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
