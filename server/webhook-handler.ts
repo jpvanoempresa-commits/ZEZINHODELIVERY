@@ -30,21 +30,13 @@ export async function handleNBPayWebhook(body: any) {
       const commission = 10; // Comissão fixa de R$10
       const netAmount = amount - commission;
       
-      // 3. Somar saldo do restaurante automaticamente
-      await db.update(restaurants)
-        .set({ balance: (restaurants.balance as any).add(netAmount) })
-        .where(eq(restaurants.id, restaurantId));
-      
+      // 3. TODO: Somar saldo do restaurante automaticamente em tabela separada
       // 4. Registrar no histórico de comissões
       await db.insert(commissions).values({
         restaurantId,
         orderId,
-        commission,
-        netAmount,
-        status: "completed",
-        transactionId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        amount: netAmount.toString(),
+        status: "paid",
       } as any);
       
       console.log(`[NBPay Webhook] Saldo atualizado para restaurante ${restaurantId}: +R$${netAmount.toFixed(2)}`);

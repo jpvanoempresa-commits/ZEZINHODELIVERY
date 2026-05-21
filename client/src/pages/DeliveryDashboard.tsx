@@ -8,9 +8,10 @@ import { trpc } from "@/lib/trpc";
 export default function DeliveryDashboard() {
   const [selectedDelivery, setSelectedDelivery] = useState<any>(null);
 
-  const { data: availableDeliveries } = trpc.deliveries.getAvailable.useQuery();
-  const { data: activeDeliveries } = trpc.deliveries.getActive.useQuery();
-  const { data: completedDeliveries } = trpc.deliveries.getCompleted.useQuery();
+  // TODO: Implementar procedures de deliveries
+  const availableDeliveries: any[] = [];
+  const activeDeliveries: any[] = [];
+  const completedDeliveries: any[] = [];
 
   const totalEarnings = completedDeliveries?.reduce((sum: number, d: any) => 
     sum + parseFloat(d.deliveryFee || 0), 0) || 0;

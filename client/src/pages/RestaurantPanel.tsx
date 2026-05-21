@@ -5,8 +5,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, ShoppingBag, DollarSign, Plus, ArrowLeft } from "lucide-react";
+import { BarChart3, ShoppingBag, DollarSign, Plus, ArrowLeft, Edit2, Trash2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function RestaurantPanel() {
   const [, setLocation] = useLocation();
@@ -146,14 +148,7 @@ export default function RestaurantPanel() {
 
           <TabsContent value="products">
             <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold">Meus Produtos</h3>
-                <Button className="bg-red-600 hover:bg-red-700" size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar Produto
-                </Button>
-              </div>
-              <p className="text-gray-600">Seus produtos aparecerão aqui...</p>
+              <ProductsTab restaurantData={restaurantData} />
             </Card>
           </TabsContent>
 
@@ -194,6 +189,133 @@ export default function RestaurantPanel() {
           </TabsContent>
         </Tabs>
       </div>
+    </div>
+  );
+}
+
+function ProductsTab({ restaurantData }: { restaurantData: any }) {
+  const [showDialog, setShowDialog] = useState(false);
+  const [formData, setFormData] = useState({ name: "", description: "", price: "", category: "" });
+
+  // Buscar produtos do restaurante
+  const { data: products, refetch } = trpc.products.getByRestaurant.useQuery(
+    { restaurantId: restaurantData?.id || 0 },
+    { enabled: !!restaurantData?.id }
+  );
+
+  // Mutation para criar produto
+  const createMutation = trpc.products.create.useMutation({
+    onSuccess: () => {
+      setFormData({ name: "", description: "", price: "", category: "" });
+      setShowDialog(false);
+      refetch();
+    },
+  });
+
+  // Mutation para deletar produto
+  const deleteMutation = trpc.products.delete.useMutation({
+    onSuccess: () => refetch(),
+  });
+
+  const handleSave = () => {
+    if (formData.name && formData.price) {
+      createMutation.mutate({
+        restaurantId: restaurantData?.id || 0,
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        category: formData.category,
+      });
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-bold">Meus Produtos</h3>
+        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+          <DialogTrigger asChild>
+            <Button className="bg-red-600 hover:bg-red-700" size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Produto
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Adicionar Novo Produto</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                placeholder="Nome do produto"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+              <Textarea
+                placeholder="Descrição"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+              <Input
+                type="number"
+                placeholder="Preço (R$)"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              />
+              <Input
+                placeholder="Categoria (ex: Pizza, Hambúrguer)"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              />
+              <Button
+                className="w-full bg-red-600 hover:bg-red-700"
+                onClick={handleSave}
+                disabled={createMutation.isPending}
+              >
+                {createMutation.isPending ? "Salvando..." : "Salvar Produto"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {products && products.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {products.map((product: any) => (
+            <Card key={product.id} className="p-4 border">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
+                  <h4 className="font-bold text-lg">{product.name}</h4>
+                  <p className="text-sm text-gray-600 mb-2">{product.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-red-600">R$ {parseFloat(product.price).toFixed(2)}</span>
+                    <span className="text-xs bg-gray-100 px-2 py-1 rounded">{product.category || "Sem categoria"}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => alert("Edição em desenvolvimento")}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => deleteMutation.mutate({ id: product.id })}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-600 text-center py-8">Nenhum produto adicionado ainda. Clique em "Adicionar Produto" para começar!</p>
+      )}
     </div>
   );
 }

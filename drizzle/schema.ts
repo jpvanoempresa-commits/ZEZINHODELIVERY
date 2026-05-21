@@ -301,3 +301,17 @@ export const deliveryAssignments = mysqlTable("deliveryAssignments", {
 
 export type DeliveryAssignment = typeof deliveryAssignments.$inferSelect;
 export type InsertDeliveryAssignment = typeof deliveryAssignments.$inferInsert;
+
+/**
+ * Balances table (saldos de restaurantes e admin)
+ */
+export const balances = mysqlTable("balances", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).default("0").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Balance = typeof balances.$inferSelect;
+export type InsertBalance = typeof balances.$inferInsert;

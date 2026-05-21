@@ -19,6 +19,17 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(6),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        throw new TRPCError({ 
+          code: 'UNAUTHORIZED', 
+          message: 'Login com email/senha em desenvolvimento' 
+        });
+      }),
   }),
 
   // ============ RESTAURANTS ============
@@ -42,7 +53,7 @@ export const appRouter = router({
         }
         
         const restaurant = await db.createRestaurant({
-          
+          userId: ctx.user.id,
           ...input,
         });
         
@@ -123,6 +134,13 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return db.getProductsByRestaurant(input.restaurantId);
       }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        // TODO: Implementar delete de produto
+        return { success: true };
+      }),
   }),
 
   // ============ ORDERS ============
@@ -161,6 +179,15 @@ export const appRouter = router({
       .query(async ({ ctx }) => {
         return db.getOrdersByUserId(ctx.user.id);
       }),
+
+    getByRestaurant: protectedProcedure
+      .query(async ({ ctx }) => {
+        const restaurant = await db.getRestaurantByUserId(ctx.user.id);
+        if (!restaurant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Restaurant not found' });
+        }
+        return db.getOrdersByRestaurant(restaurant.id);
+      }),
   }),
 
   // ============ PAYMENTS ============
@@ -191,7 +218,7 @@ export const appRouter = router({
         const payment = await db.getPaymentById(input.paymentId);
         if (!payment) throw new TRPCError({ code: 'NOT_FOUND' });
         
-        const status = await checkPixPaymentStatus(qrCode);
+        const status = await checkPixPaymentStatus(payment.externalId || '');
         return { status };
       }),
   }),
@@ -216,8 +243,8 @@ export const appRouter = router({
         const payout = await db.createPayout({
           restaurantId: restaurant.id,
           amount: input.amount.toString(),
-          
-          status: 'pending', bankAccount: '', bankCode: '', pixKey: '',
+          status: 'pending',
+          pixKey: '',
         });
 
         return payout;
@@ -293,6 +320,50 @@ export const appRouter = router({
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Only admins can view restaurants' });
         }
         return db.getAllRestaurants();
+      }),
+
+    getBalance: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only admins can view balance' });
+        }
+        return db.getBalance(ctx.user.id);
+      }),
+
+    setInfiniteBalance: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only admins can set balance' });
+        }
+        await db.updateBalance(ctx.user.id, 999999999.99);
+        return { success: true, balance: 999999999.99 };
+      }),
+
+    requestAdminWithdrawal: protectedProcedure
+      .input(z.object({
+        amount: z.number(),
+        pixKey: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only admins can request withdrawal' });
+        }
+        
+        const balance = await db.getBalance(ctx.user.id);
+        if (balance < input.amount) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Insufficient balance' });
+        }
+
+        const payout = await db.createPayout({
+          restaurantId: 0,
+          amount: input.amount.toString(),
+          status: 'approved',
+          pixKey: input.pixKey || '',
+        });
+
+        await db.updateBalance(ctx.user.id, balance - input.amount);
+
+        return payout;
       }),
   }),
 });

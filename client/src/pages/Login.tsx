@@ -4,11 +4,47 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Mail, Lock, Phone, ArrowLeft } from "lucide-react";
+import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Mutation para login com email/senha
+  const loginMutation = trpc.auth.login.useMutation({
+    onSuccess: () => {
+      setLocation("/");
+    },
+    onError: (err) => {
+      setError(err.message || "Erro ao fazer login");
+    },
+  });
+
+  const handleEmailLogin = async () => {
+    if (!email || !password) {
+      setError("Por favor, preencha email e senha");
+      return;
+    }
+    setIsLoading(true);
+    setError("");
+    loginMutation.mutate({ email, password });
+    setIsLoading(false);
+  };
+
+  const handleGoogleLogin = () => {
+    // Redirecionar para OAuth com tipo Google
+    const loginUrl = getLoginUrl();
+    window.location.href = loginUrl + "&provider=google";
+  };
+
+  const handlePhoneLogin = () => {
+    // Redirecionar para página de login com telefone
+    setLocation("/login-phone");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center p-4">
@@ -26,6 +62,12 @@ export default function Login() {
             <h1 className="text-3xl font-bold text-red-600">Zezinho Delivery</h1>
             <p className="text-gray-600 mt-2">Entre na sua conta</p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div>
@@ -56,8 +98,12 @@ export default function Login() {
               </div>
             </div>
 
-            <Button className="w-full bg-red-600 hover:bg-red-700">
-              Entrar
+            <Button 
+              className="w-full bg-red-600 hover:bg-red-700"
+              onClick={handleEmailLogin}
+              disabled={isLoading || loginMutation.isPending}
+            >
+              {isLoading || loginMutation.isPending ? "Entrando..." : "Entrar"}
             </Button>
 
             <div className="relative my-4">
@@ -69,11 +115,19 @@ export default function Login() {
               </div>
             </div>
 
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleGoogleLogin}
+            >
               Entrar com Google
             </Button>
 
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handlePhoneLogin}
+            >
               <Phone className="w-4 h-4 mr-2" />
               Entrar com Telefone
             </Button>

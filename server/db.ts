@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, restaurants, products, orders, orderItems, 
   payments, commissions, payouts, categories, restaurantCategories, 
-  coupons, ratings, deliveryAssignments 
+  coupons, ratings, deliveryAssignments, balances 
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -122,7 +122,6 @@ export async function createRestaurant(data: {
     latitude: data.latitude || null,
     longitude: data.longitude || null,
     image: data.image || null,
-    balance: 0,
   });
   
   return result;
@@ -189,10 +188,13 @@ export async function createOrder(data: {
   if (!db) throw new Error("Database not available");
   
   const result = await db.insert(orders).values({
-    userId: data.userId,
+    customerId: data.userId,
     restaurantId: data.restaurantId,
+    subtotal: data.total,
     total: data.total,
+    restaurantReceives: data.total,
     deliveryAddress: data.deliveryAddress,
+    paymentMethod: 'pix',
     status: data.status as any,
   });
   
@@ -209,7 +211,7 @@ export async function getOrderById(id: number) {
 export async function getOrdersByUserId(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt)).limit(50);
+  return db.select().from(orders).where(eq(orders.customerId, userId)).orderBy(desc(orders.createdAt)).limit(50);
 }
 
 export async function getOrdersByRestaurant(restaurantId: number) {
@@ -268,10 +270,9 @@ export async function createPayout(data: {
   restaurantId: number;
   amount: string;
   status: string;
-  bankAccount: string;
-  bankCode: string;
   pixKey?: string;
   externalId?: string;
+  notes?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -280,10 +281,9 @@ export async function createPayout(data: {
     restaurantId: data.restaurantId,
     amount: data.amount,
     status: data.status as any,
-    bankAccount: data.bankAccount,
-    bankCode: data.bankCode,
     pixKey: data.pixKey || null,
     externalId: data.externalId || null,
+    notes: data.notes || null,
   });
 }
 
@@ -302,7 +302,7 @@ export async function getAllPayouts() {
 export async function updatePayoutStatus(payoutId: number, status: string) {
   const db = await getDb();
   if (!db) return null;
-  return db.update(payouts).set({ status: status as any, updatedAt: new Date() }).where(eq(payouts.id, payoutId));
+  return db.update(payouts).set({ status: status as any }).where(eq(payouts.id, payoutId));
 }
 
 // ============ ADMIN ============
@@ -338,17 +338,52 @@ export async function getAllRestaurants() {
     .limit(100);
 }
 
+// ============ BALANCES ============
+export async function getBalance(userId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select().from(balances).where(eq(balances.userId, userId)).limit(1);
+  return result.length > 0 ? parseFloat(result[0].amount.toString()) : 0;
+}
+
+export async function updateBalance(userId: number, amount: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const existing = await db.select().from(balances).where(eq(balances.userId, userId)).limit(1);
+  
+  if (existing.length > 0) {
+    return db.update(balances)
+      .set({ amount: amount.toString() })
+      .where(eq(balances.userId, userId));
+  } else {
+    return db.insert(balances).values({
+      userId,
+      amount: amount.toString(),
+    });
+  }
+}
+
+export async function addBalance(userId: number, amount: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const current = await getBalance(userId);
+  return updateBalance(userId, current + amount);
+}
+
 export async function updateRestaurantBalance(restaurantId: number, amount: number) {
   const db = await getDb();
   if (!db) return null;
-  return db.update(restaurants)
-    .set({ balance: (restaurants.balance as any).add(amount) })
-    .where(eq(restaurants.id, restaurantId));
+  const restaurant = await getRestaurantById(restaurantId);
+  if (!restaurant) return null;
+  return updateBalance(restaurant.userId, amount);
 }
 
 export async function getRestaurantBalance(restaurantId: number) {
   const db = await getDb();
   if (!db) return 0;
-  const result = await db.select({ balance: restaurants.balance }).from(restaurants).where(eq(restaurants.id, restaurantId)).limit(1);
-  return result[0]?.balance || 0;
+  const restaurant = await getRestaurantById(restaurantId);
+  if (!restaurant) return 0;
+  return getBalance(restaurant.userId);
 }

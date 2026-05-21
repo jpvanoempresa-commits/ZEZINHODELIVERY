@@ -12,6 +12,7 @@ import RestaurantPanel from "./pages/RestaurantPanel";
 import DeliveryPanel from "./pages/DeliveryPanel";
 import AdminPanel from "./pages/AdminPanel";
 import Login from "./pages/Login";
+import LoginPhone from "./pages/LoginPhone";
 import Register from "./pages/Register";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/login"} component={Login} />
+      <Route path={"/login-phone"} component={LoginPhone} />
       <Route path={"/register"} component={Register} />
       <Route path={"/search"} component={Search} />
       <Route path={"/restaurant/:id"} component={Restaurant} />
