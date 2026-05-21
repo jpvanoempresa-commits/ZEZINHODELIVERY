@@ -7,6 +7,9 @@ import * as db from "./db";
 import { TRPCError } from "@trpc/server";
 import { generatePixQRCode, checkPixPaymentStatus } from "./nbpay";
 import { transferPixNexano, validatePixKey } from "./nexano";
+import { sdk } from "./_core/sdk";
+
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
 export const appRouter = router({
   system: systemRouter,
@@ -57,10 +60,44 @@ export const appRouter = router({
         password: z.string().min(6),
       }))
       .mutation(async ({ ctx, input }) => {
-        throw new TRPCError({ 
-          code: 'UNAUTHORIZED', 
-          message: 'Login com email/senha em desenvolvimento' 
+        const user = await db.getUserByEmail(input.email);
+        if (!user) {
+          throw new TRPCError({ 
+            code: 'UNAUTHORIZED', 
+            message: 'Email ou senha inválidos' 
+          });
+        }
+
+        const passwordCred = await db.getPasswordCredential(user.id);
+        if (!passwordCred) {
+          throw new TRPCError({ 
+            code: 'UNAUTHORIZED', 
+            message: 'Email ou senha inválidos' 
+          });
+        }
+
+        const bcrypt = await import('bcryptjs');
+        const isPasswordValid = await bcrypt.default.compare(input.password, passwordCred.hashedPassword);
+        
+        if (!isPasswordValid) {
+          throw new TRPCError({ 
+            code: 'UNAUTHORIZED', 
+            message: 'Email ou senha inválidos' 
+          });
+        }
+
+        const sessionToken = await sdk.createSessionToken(user.openId, {
+          name: user.name || '',
+          expiresInMs: ONE_YEAR_MS,
         });
+
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+        return {
+          success: true,
+          user,
+        };
       }),
   }),
 

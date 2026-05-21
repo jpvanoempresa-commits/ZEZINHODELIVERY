@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, restaurants, products, orders, orderItems, 
   payments, commissions, payouts, categories, restaurantCategories, 
-  coupons, ratings, deliveryAssignments, balances 
+  coupons, ratings, deliveryAssignments, balances, passwordCredentials 
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -410,6 +410,9 @@ export async function createUserWithPassword(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  const bcrypt = await import('bcryptjs');
+  const hashedPassword = await bcrypt.default.hash(data.password, 10);
+
   const result = await db.insert(users).values({
     name: data.name,
     email: data.email,
@@ -420,5 +423,37 @@ export async function createUserWithPassword(data: {
     lastSignedIn: new Date(),
   });
 
+  const usersResult = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+  if (usersResult.length > 0) {
+    await setPasswordCredential(usersResult[0].id, hashedPassword);
+  }
+
   return result;
+}
+
+// ============ PASSWORD CREDENTIALS ============
+export async function setPasswordCredential(userId: number, hashedPassword: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const existing = await db.select().from(passwordCredentials).where(eq(passwordCredentials.userId, userId)).limit(1);
+  
+  if (existing.length > 0) {
+    return db.update(passwordCredentials)
+      .set({ hashedPassword })
+      .where(eq(passwordCredentials.userId, userId));
+  } else {
+    return db.insert(passwordCredentials).values({
+      userId,
+      hashedPassword,
+    });
+  }
+}
+
+export async function getPasswordCredential(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.select().from(passwordCredentials).where(eq(passwordCredentials.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : null;
 }
