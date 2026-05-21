@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, restaurants, products, orders, orderItems, 
@@ -110,34 +110,42 @@ export async function createRestaurant(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(restaurants).values(data);
-  return result;
-}
-
-export async function getRestaurantsByCity(city: string) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  const result = await db.insert(restaurants).values({
+    userId: data.userId,
+    name: data.name,
+    description: data.description || null,
+    phone: data.phone,
+    email: data.email,
+    address: data.address,
+    city: data.city,
+    zipCode: data.zipCode || null,
+    latitude: data.latitude || null,
+    longitude: data.longitude || null,
+    image: data.image || null,
+    balance: 0,
+  });
   
-  return db.select().from(restaurants)
-    .where(and(eq(restaurants.city, city), eq(restaurants.status, 'active')));
+  return result;
 }
 
 export async function getRestaurantById(id: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.select().from(restaurants)
-    .where(eq(restaurants.id, id));
-  return result[0];
+  if (!db) return null;
+  const result = await db.select().from(restaurants).where(eq(restaurants.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function getRestaurantsByCity(city: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(restaurants).where(eq(restaurants.city, city)).limit(50);
 }
 
 export async function getRestaurantByUserId(userId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.select().from(restaurants)
-    .where(eq(restaurants.userId, userId));
-  return result[0];
+  if (!db) return null;
+  const result = await db.select().from(restaurants).where(eq(restaurants.userId, userId)).limit(1);
+  return result[0] || null;
 }
 
 // ============ PRODUCTS ============
@@ -152,152 +160,91 @@ export async function createProduct(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  return db.insert(products).values(data);
+  return db.insert(products).values({
+    restaurantId: data.restaurantId,
+    name: data.name,
+    description: data.description || null,
+    price: data.price,
+    image: data.image || null,
+    category: data.category || null,
+  });
 }
 
 export async function getProductsByRestaurant(restaurantId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.select().from(products)
-    .where(eq(products.restaurantId, restaurantId));
-}
-
-export async function getProductById(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.select().from(products)
-    .where(eq(products.id, id));
-  return result[0];
+  if (!db) return [];
+  return db.select().from(products).where(eq(products.restaurantId, restaurantId)).limit(100);
 }
 
 // ============ ORDERS ============
 export async function createOrder(data: {
-  customerId: number;
+  userId: number;
   restaurantId: number;
-  subtotal: string;
-  deliveryFee: string;
-  discount: string;
-  commission: string;
+  items: Array<{ productId: number; quantity: number; price: string }>;
   total: string;
-  restaurantReceives: string;
-  paymentMethod: 'pix' | 'credit_card' | 'debit_card';
   deliveryAddress: string;
-  customerNotes?: string;
+  status: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  return db.insert(orders).values(data);
+  const result = await db.insert(orders).values({
+    userId: data.userId,
+    restaurantId: data.restaurantId,
+    total: data.total,
+    deliveryAddress: data.deliveryAddress,
+    status: data.status as any,
+  });
+  
+  return result;
 }
 
 export async function getOrderById(id: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.select().from(orders)
-    .where(eq(orders.id, id));
-  return result[0];
+  if (!db) return null;
+  const result = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
+  return result[0] || null;
 }
 
-export async function getOrdersByCustomer(customerId: number) {
+export async function getOrdersByUserId(userId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.select().from(orders)
-    .where(eq(orders.customerId, customerId))
-    .orderBy(desc(orders.createdAt));
+  if (!db) return [];
+  return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt)).limit(50);
 }
 
 export async function getOrdersByRestaurant(restaurantId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
   return db.select().from(orders)
     .where(eq(orders.restaurantId, restaurantId))
     .orderBy(desc(orders.createdAt));
-}
-
-export async function updateOrderStatus(orderId: number, status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'on_delivery' | 'delivered' | 'cancelled') {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.update(orders)
-    .set({ status })
-    .where(eq(orders.id, orderId));
-}
-
-export async function updateOrderPaymentStatus(orderId: number, paymentStatus: 'pending' | 'confirmed' | 'failed' | 'refunded') {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.update(orders)
-    .set({ paymentStatus })
-    .where(eq(orders.id, orderId));
-}
-
-// ============ ORDER ITEMS ============
-export async function createOrderItem(data: {
-  orderId: number;
-  productId: number;
-  quantity: number;
-  price: string;
-  subtotal: string;
-}) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.insert(orderItems).values(data);
-}
-
-export async function getOrderItems(orderId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.select().from(orderItems)
-    .where(eq(orderItems.orderId, orderId));
 }
 
 // ============ PAYMENTS ============
 export async function createPayment(data: {
   orderId: number;
   amount: string;
-  method: 'pix' | 'credit_card' | 'debit_card';
+  method: string;
   pixKey?: string;
   externalId?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  return db.insert(payments).values(data);
+  return db.insert(payments).values({
+    orderId: data.orderId,
+    amount: data.amount,
+    method: data.method as any,
+    pixKey: data.pixKey || null,
+    externalId: data.externalId || null,
+  });
 }
 
-export async function getPaymentByOrderId(orderId: number) {
+export async function getPaymentById(paymentId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.select().from(payments)
-    .where(eq(payments.orderId, orderId));
-  return result[0];
-}
-
-export async function updatePaymentStatus(paymentId: number, status: 'pending' | 'confirmed' | 'failed' | 'refunded', webhookData?: any) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const updateData: any = {
-    status,
-    confirmedAt: status === 'confirmed' ? new Date() : undefined,
-  };
-  
-  if (webhookData) {
-    updateData.webhookData = webhookData;
-  }
-  
-  return db.update(payments)
-    .set(updateData)
-    .where(eq(payments.id, paymentId));
+  if (!db) return null;
+  const result = await db.select().from(payments).where(eq(payments.id, paymentId)).limit(1);
+  return result[0] || null;
 }
 
 // ============ COMMISSIONS ============
@@ -309,28 +256,11 @@ export async function createCommission(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  return db.insert(commissions).values(data);
-}
-
-export async function getCommissionsByRestaurant(restaurantId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.select().from(commissions)
-    .where(eq(commissions.restaurantId, restaurantId))
-    .orderBy(desc(commissions.createdAt));
-}
-
-export async function getTotalCommissions() {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.select({
-    total: sql`SUM(amount)`,
-  }).from(commissions)
-    .where(eq(commissions.status, 'pending'));
-  
-  return result[0]?.total || 0;
+  return db.insert(commissions).values({
+    orderId: data.orderId,
+    restaurantId: data.restaurantId,
+    amount: data.amount,
+  });
 }
 
 // ============ PAYOUTS ============
@@ -346,169 +276,36 @@ export async function createPayout(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  return db.insert(payouts).values(data);
+  return db.insert(payouts).values({
+    restaurantId: data.restaurantId,
+    amount: data.amount,
+    status: data.status as any,
+    bankAccount: data.bankAccount,
+    bankCode: data.bankCode,
+    pixKey: data.pixKey || null,
+    externalId: data.externalId || null,
+  });
+}
+
+export async function getPayoutsByRestaurant(restaurantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(payouts).where(eq(payouts.restaurantId, restaurantId)).orderBy(desc(payouts.createdAt));
 }
 
 export async function getAllPayouts() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
-  return db.select().from(payouts)
-    .orderBy(desc(payouts.createdAt));
+  return db.select().from(payouts).orderBy(desc(payouts.createdAt)).limit(100);
 }
 
-export async function getPayoutsByRestaurant(restaurantId: number) {
+export async function updatePayoutStatus(payoutId: number, status: string) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.select().from(payouts)
-    .where(eq(payouts.restaurantId, restaurantId))
-    .orderBy(desc(payouts.createdAt));
+  if (!db) return null;
+  return db.update(payouts).set({ status: status as any, updatedAt: new Date() }).where(eq(payouts.id, payoutId));
 }
 
-export async function updatePayoutStatus(payoutId: number, status: 'pending' | 'processing' | 'completed' | 'failed') {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const updateData: any = {
-    status,
-    completedAt: status === 'completed' ? new Date() : undefined,
-  };
-  
-  return db.update(payouts)
-    .set(updateData)
-    .where(eq(payouts.id, payoutId));
-}
-
-// ============ CATEGORIES ============
-export async function getAllCategories() {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.select().from(categories);
-}
-
-// ============ COUPONS ============
-export async function getCouponByCode(code: string) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const result = await db.select().from(coupons)
-    .where(eq(coupons.code, code));
-  return result[0];
-}
-
-// ============ RATINGS ============
-export async function createRating(data: {
-  orderId: number;
-  customerId: number;
-  restaurantId: number;
-  deliveryId?: number;
-  restaurantRating?: number;
-  deliveryRating?: number;
-  comment?: string;
-}) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.insert(ratings).values(data);
-}
-
-export async function getRatingsByRestaurant(restaurantId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.select().from(ratings)
-    .where(eq(ratings.restaurantId, restaurantId))
-    .orderBy(desc(ratings.createdAt));
-}
-
-// ============ DELIVERY ASSIGNMENTS ============
-export async function createDeliveryAssignment(data: {
-  deliveryId: number;
-  orderId: number;
-}) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.insert(deliveryAssignments).values(data);
-}
-
-export async function getDeliveryAssignmentsByDelivery(deliveryId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  return db.select().from(deliveryAssignments)
-    .where(eq(deliveryAssignments.deliveryId, deliveryId))
-    .orderBy(desc(deliveryAssignments.createdAt));
-}
-
-export async function updateDeliveryAssignmentStatus(assignmentId: number, status: 'accepted' | 'in_transit' | 'delivered' | 'cancelled') {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const updateData: any = {
-    status,
-    deliveryTime: status === 'delivered' ? new Date() : undefined,
-  };
-  
-  return db.update(deliveryAssignments)
-    .set(updateData)
-    .where(eq(deliveryAssignments.id, assignmentId));
-}
-
-// ============ NBPAY VALIDATION ============
-export async function validateNBPayCredentials(): Promise<boolean> {
-  const apiKey = process.env.NBPAY_API_KEY;
-  const secretKey = process.env.NBPAY_SECRET_KEY;
-  
-  if (!apiKey || !secretKey) {
-    console.error('[NBPay] Missing API credentials');
-    return false;
-  }
-  
-  // Validate format
-  if (!apiKey.startsWith('nxp_')) {
-    console.error('[NBPay] Invalid API key format');
-    return false;
-  }
-  
-  if (secretKey.length < 10) {
-    console.error('[NBPay] Invalid secret key format');
-    return false;
-  }
-  
-  console.log('[NBPay] Credentials validated successfully');
-  return true;
-}
-
-// ============ DELIVERIES - HELPERS ============
-export async function getAvailableDeliveries() {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  return db.select().from(deliveryAssignments)
-    .where(eq(deliveryAssignments.status, 'pending'))
-    .limit(20);
-}
-
-export async function getActiveDeliveries(userId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  return db.select().from(deliveryAssignments)
-    .where(eq(deliveryAssignments.status, 'active'))
-    .limit(10);
-}
-
-export async function getCompletedDeliveries(userId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  return db.select().from(deliveryAssignments)
-    .where(eq(deliveryAssignments.status, 'completed'))
-    .orderBy(desc(deliveryAssignments.updatedAt))
-    .limit(50);
-}
-
-// ============ ADMIN - HELPERS ============
+// ============ ADMIN ============
 export async function getAllOrders() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -541,22 +338,9 @@ export async function getAllRestaurants() {
     .limit(100);
 }
 
-export async function updatePayout(payoutId: number, data: { status?: string; transactionId?: string }) {
-  const db = await getDb();
-  if (!db) return null;
-  
-  const updates: any = {};
-  if (data.status) updates.status = data.status;
-  if (data.transactionId) updates.transactionId = data.transactionId;
-  updates.updatedAt = new Date();
-  
-  return db.update(payouts).set(updates).where(eq(payouts.id, payoutId));
-}
-
 export async function updateRestaurantBalance(restaurantId: number, amount: number) {
   const db = await getDb();
   if (!db) return null;
-  
   return db.update(restaurants)
     .set({ balance: (restaurants.balance as any).add(amount) })
     .where(eq(restaurants.id, restaurantId));
@@ -567,24 +351,4 @@ export async function getRestaurantBalance(restaurantId: number) {
   if (!db) return 0;
   const result = await db.select({ balance: restaurants.balance }).from(restaurants).where(eq(restaurants.id, restaurantId)).limit(1);
   return result[0]?.balance || 0;
-}
-
-export async function getOrdersByRestaurant(restaurantId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(orders).where(eq(orders.restaurantId, restaurantId)).orderBy(desc(orders.createdAt)).limit(50);
-}
-
-export async function getRestaurantByUserId(userId: number) {
-  const db = await getDb();
-  if (!db) return null;
-  const result = await db.select().from(restaurants).where(eq(restaurants.userId, userId)).limit(1);
-  return result[0] || null;
-}
-
-export async function getPaymentById(paymentId: number) {
-  const db = await getDb();
-  if (!db) return null;
-  const result = await db.select().from(payments).where(eq(payments.id, paymentId)).limit(1);
-  return result[0] || null;
 }

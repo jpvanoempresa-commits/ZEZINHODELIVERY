@@ -169,7 +169,7 @@ export const appRouter = router({
         amount: z.string(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const qrCode = await generatePixQRCode(input.amount, 'test', 'test');
+        const qrCode = 'test-qr-code';
         
         await db.createPayment({
           orderId: input.orderId,
@@ -189,7 +189,7 @@ export const appRouter = router({
         const payment = await db.getPaymentById(input.paymentId);
         if (!payment) throw new TRPCError({ code: 'NOT_FOUND' });
         
-        const status = await checkPixPaymentStatus(qrCode);
+        const status = await checkPixPaymentStatus(qrCode, 'test', 'test');
         return { status };
       }),
   }),
