@@ -26,6 +26,9 @@ import Restaurants from "./pages/Restaurants";
 import Menu from "./pages/Menu";
 import Cart from "./pages/Cart";
 import CheckoutPage from "./pages/CheckoutPage";
+import RestaurantPanelPage from "./pages/RestaurantPanelPage";
+import DeliveryPanelPage from "./pages/DeliveryPanelPage";
+import AdminPanelPage from "./pages/AdminPanelPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -53,6 +56,9 @@ function Router() {
       <Route path={"/menu/:id"} component={Menu} />
       <Route path={"/cart"} component={Cart} />
       <Route path={"/checkout"} component={CheckoutPage} />
+      <Route path={"/restaurant-panel"} component={RestaurantPanelPage} />
+      <Route path={"/delivery-panel"} component={DeliveryPanelPage} />
+      <Route path={"/admin-panel"} component={AdminPanelPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
