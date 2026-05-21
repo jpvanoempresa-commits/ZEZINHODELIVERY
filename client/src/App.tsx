@@ -14,6 +14,13 @@ import AdminPanel from "./pages/AdminPanel";
 import Login from "./pages/Login";
 import LoginPhone from "./pages/LoginPhone";
 import Register from "./pages/Register";
+import ProfileCustomer from "./pages/ProfileCustomer";
+import Notifications from "./pages/Notifications";
+import Settings from "./pages/Settings";
+import Support from "./pages/Support";
+import OrderHistory from "./pages/OrderHistory";
+import OrderTracking from "./pages/OrderTracking";
+import Ratings from "./pages/Ratings";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -29,6 +36,13 @@ function Router() {
       <Route path={"/dashboard/restaurant"} component={RestaurantPanel} />
       <Route path={"/dashboard/delivery"} component={DeliveryPanel} />
       <Route path={"/dashboard/admin"} component={AdminPanel} />
+      <Route path={"/profile"} component={ProfileCustomer} />
+      <Route path={"/notifications"} component={Notifications} />
+      <Route path={"/settings"} component={Settings} />
+      <Route path={"/support"} component={Support} />
+      <Route path={"/order-history"} component={OrderHistory} />
+      <Route path={"/order-tracking"} component={OrderTracking} />
+      <Route path={"/ratings"} component={Ratings} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

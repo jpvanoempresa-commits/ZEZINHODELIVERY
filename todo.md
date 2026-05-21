@@ -63,3 +63,25 @@
 - [x] Registro de todas as transações - Tabelas de histórico
 - [x] Testes unitários e de integração - NBPay testado
 - [x] Testes de segurança - Roles e permissões implementadas
+
+## Fase 11: Criação de Todas as Páginas (Nova)
+- [ ] Melhorar Home.tsx com design moderno
+- [ ] Melhorar Login.tsx com design profissional
+- [ ] Melhorar Register.tsx com design profissional
+- [ ] Criar RestaurantDetail.tsx (cardápio completo)
+- [ ] Criar Cart.tsx (carrinho de compras)
+- [ ] Criar Checkout.tsx (finalização de pedido)
+- [ ] Criar OrderTracking.tsx (rastreamento em tempo real)
+- [ ] Criar OrderHistory.tsx (histórico de pedidos)
+- [ ] Criar Ratings.tsx (avaliações)
+- [ ] Criar ProfileCustomer.tsx (perfil do cliente)
+- [ ] Criar ProfileRestaurant.tsx (perfil do restaurante)
+- [ ] Criar ProfileDelivery.tsx (perfil do entregador)
+- [ ] Criar Promotions.tsx (promoções)
+- [ ] Criar Support.tsx (suporte)
+- [ ] Criar Settings.tsx (configurações)
+- [ ] Criar Notifications.tsx (notificações)
+- [ ] Melhorar RestaurantDashboard.tsx
+- [ ] Melhorar DeliveryDashboard.tsx
+- [ ] Melhorar AdminDashboard.tsx
+- [ ] Implementar sincronização em tempo real (WebSocket/SSE)
