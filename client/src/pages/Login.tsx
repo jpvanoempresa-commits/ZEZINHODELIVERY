@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Mail, Lock, Phone } from "lucide-react";
+import { Mail, Lock, Phone, ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -14,6 +14,14 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <div className="p-8">
+          <button 
+            onClick={() => setLocation("/")}
+            className="flex items-center text-red-600 hover:text-red-700 mb-6"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </button>
+
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-red-600">Zezinho Delivery</h1>
             <p className="text-gray-600 mt-2">Entre na sua conta</p>
